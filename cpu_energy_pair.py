@@ -3,24 +3,33 @@ import pandas as pd
 import json
 from scipy.interpolate import interp1d
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 import math
 import numpy as np
 from sklearn.metrics import r2_score
+import matplotlib.pyplot as plt
 
 class CpuEnergyPair:
 
 
-    def __init__(self, cpu_file_path : str, energy_file_path : str):
+    def __init__(self, cpu_file_path : Optional[str] = None, energy_file_path : Optional[str] = None, cpu_df : Optional[pd.DataFrame] = None, energy_df : Optional[pd.DataFrame] = None):
 
         self._raw_cpu_path = cpu_file_path
         self._raw_energy_path = energy_file_path
 
-        self._cpu_df = self._convert_raw_cpu_to_csv()
+        if cpu_df is not None:
+            self._cpu_df = cpu_df
+        else:
+            self._cpu_df = self._convert_raw_cpu_to_csv()
+            self._compute_cpu_utilizations()
 
-        self._compute_cpu_utilizations()
 
-        self._energy_df = self._convert_raw_energy_to_csv()
+        if energy_df is not None:
+            self._energy_df = energy_df
+        else:
+            self._energy_df = self._convert_raw_energy_to_csv()
+
+        self._merged_cpu_energy_df : Optional[pd.DataFrame] = None
 
 
     def merge_data(self) -> pd.DataFrame:
@@ -36,7 +45,9 @@ class CpuEnergyPair:
             new_row = pd.DataFrame({"collection_time": [cpu_time], "cpu_util": [cpu_util], "watts": [wattage]})
             merged_df = pd.concat([merged_df, new_row], ignore_index=True, sort=False)
 
+        self._merged_cpu_energy_df = merged_df
 
+        print("Merged CPU and Energy data")
         return merged_df
             
 
@@ -109,7 +120,9 @@ class CpuEnergyPair:
         cpu_bin_ordering : List[int] = []
         cpu_bins : Dict[str, List[float]] = {}
         for util in cpu_data:
-            bin_idx = math.floor((util - min(cpu_data)) / bin_width)
+            bin_idx = math.floor(((util - min(cpu_data)) / bin_width))
+            if bin_idx == 10:
+                bin_idx = 9 # Fix for rounding error
             cpu_bin_ordering.append(bin_idx)
             cpu_bins[str(bin_idx)] = cpu_bins.get(str(bin_idx), []) + [util]
 
@@ -126,18 +139,39 @@ class CpuEnergyPair:
         
     def compute_poly_regression(self, degree : int) -> Tuple[List[float], float]:
 
-        merged_df = self.merge_data()
+        if self._merged_cpu_energy_df is None:
+            self._merged_cpu_energy_df = self.merge_data()
 
-        cpu_data = merged_df["cpu_util"].to_list()
-        energy_data = merged_df["watts"].to_list()
-
-        
+        cpu_data = self._merged_cpu_energy_df["cpu_util"].to_list()
+        energy_data = self._merged_cpu_energy_df["watts"].to_list()
 
         poly_coefs = np.polyfit(cpu_data, energy_data, degree)
         poly_fn = np.poly1d(poly_coefs)
 
         r_2 = r2_score(energy_data, poly_fn(cpu_data))
-        return np.flip(poly_coefs), r_2
+        return poly_coefs, r_2
+
+
+    def plot(self, regression : bool = False, degree : int = 1):
+
+        if self._merged_cpu_energy_df is None:
+            self._merged_cpu_energy_df = self.merge_data()
+            
+        cpu_data = self._merged_cpu_energy_df["cpu_util"].to_list()
+        energy_data = self._merged_cpu_energy_df["watts"].to_list()
+
+        plt.scatter(cpu_data, energy_data)
+
+        if regression:
+            poly_coefs, r_2 = self.compute_poly_regression(degree)
+            poly_fn = np.poly1d(poly_coefs)
+
+            plt.plot(cpu_data, poly_fn(cpu_data), color="red", label=f"Degree {degree} Polynomial Fit (R^2 = {r_2:.2f})")
+            plt.legend()
+
+        plt.xlabel("CPU Utilization (%)")
+        plt.ylabel("Energy (Watts)")
+        plt.show()
 
 
     def _compute_cpu_utilizations(self):
@@ -170,6 +204,9 @@ class CpuEnergyPair:
 
     def _convert_raw_cpu_to_csv(self) -> pd.DataFrame:
 
+        if self._raw_cpu_path is None:
+            raise ValueError("Must set raw CPU data path before converting to CSV")
+
         raw_path = Path(self._raw_cpu_path)
 
         if raw_path.suffix == ".csv":
@@ -193,6 +230,9 @@ class CpuEnergyPair:
         return pd.read_csv(out_path)
     
     def _convert_raw_energy_to_csv(self) -> pd.DataFrame:
+
+        if self._raw_energy_path is None:
+            raise ValueError("Must set raw Energy data path before converting to CSV")
 
         raw_path = Path(self._raw_energy_path)
 
@@ -223,3 +263,9 @@ class CpuEnergyPair:
 
         return pd.read_csv(out_path.as_posix())
     
+    def __add__(self, other : "CpuEnergyPair") -> "CpuEnergyPair":
+        
+        new_cpu_df = pd.concat([self._cpu_df, other._cpu_df], ignore_index=True, sort=False)
+        new_energy_df = pd.concat([self._energy_df, other._energy_df], ignore_index=True, sort=False)
+
+        return CpuEnergyPair(cpu_df=new_cpu_df, energy_df=new_energy_df)
