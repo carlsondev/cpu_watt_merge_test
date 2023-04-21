@@ -5,7 +5,7 @@ import sys
 import json
 import pandas as pd
 from sklearn.metrics import mean_squared_error
-from file_math_methods import apply_poly_regression, apply_exp_regression, poly_reg_str, exp_reg_str, generate_rand_cpu_util
+from math_methods import apply_poly_regression, apply_exp_regression, poly_reg_str, exp_reg_str, generate_rand_cpu_utils
 
 
 def get_stats(real_data : List[float], pred_data : List[float]) -> Tuple[Tuple[float, float], float]:

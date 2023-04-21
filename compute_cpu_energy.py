@@ -14,7 +14,7 @@ def main(cpu_energy_path_pairs : List[Tuple[str, str]]):
 
     total_cpu_energy_data : Optional[CpuEnergyPair] = None
 
-    regression_degree = 1
+    reg_degree = 1
     bin_count = 10
 
     json_dict : Dict[str, Dict[str, Any]] = {}
@@ -24,19 +24,8 @@ def main(cpu_energy_path_pairs : List[Tuple[str, str]]):
         cpu_energy_pair.apply_moving_average()
         cpu_energy_pair.merge_data()
 
-        bin_ordering, bin_data = cpu_energy_pair.compute_cpu_data(bin_count)
-
-        json_dict[f"pair_{pair_idx+1}"] = {
-            "bin_ordering" : bin_ordering,
-            "cpu_bins" : bin_data
-        }
-
-        coefs, r_2 = cpu_energy_pair.compute_poly_regression(regression_degree)
-        reg_dict = {
-            "coefs" : coefs.tolist(),
-            "r_2" : r_2
-        }
-        json_dict[f"pair_{pair_idx+1}"]["regression"] = reg_dict
+        json_dict[f"pair_{pair_idx+1}"] = cpu_energy_pair.export_to_json_dict(bin_count, reg_degree)
+        cpu_energy_pair.export_merged_to_csv()
 
         if total_cpu_energy_data is None:
             total_cpu_energy_data = cpu_energy_pair
@@ -45,17 +34,7 @@ def main(cpu_energy_path_pairs : List[Tuple[str, str]]):
 
     total_cpu_energy_data.merge_data()
 
-    bin_ordering, bin_data = total_cpu_energy_data.compute_cpu_data(bin_count)
-    coefs, r_2 = total_cpu_energy_data.compute_poly_regression(regression_degree)
-
-    json_dict["all_data"] = {
-        "bin_ordering" : bin_ordering,
-        "cpu_bins" : bin_data,
-        "regression" : {
-            "coefs" : coefs.tolist(),
-            "r_2" : r_2
-        }
-    }
+    json_dict["all_data"] = total_cpu_energy_data.export_to_json_dict(bin_count, reg_degree)
 
     if len(cpu_energy_pairs) > 1:
         file_path = f"cpu_energy_data_1_{len(cpu_energy_pairs)}.json"
@@ -65,7 +44,9 @@ def main(cpu_energy_path_pairs : List[Tuple[str, str]]):
     with open(file_path, "w") as f:
         json.dump(json_dict, f, indent=4)
 
-    total_cpu_energy_data.plot(regression=True, degree=regression_degree)
+    total_cpu_energy_data.export_merged_to_csv()
+
+    total_cpu_energy_data.plot(regression=True, degree=reg_degree)
 
 
 

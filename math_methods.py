@@ -56,4 +56,16 @@ def plot_regression(cpu_utils : List[float], watts : List[float], generated_watt
     plt.legend()
     plt.show()
 
-def perform_energy_linear_interp(cpu_df : pd.DataFrame, energy_df : pd.DataFrame)
+
+def generate_rand_cpu_utils(bin_ordering : int, bin_data : Dict[str, Any]) -> List[float]:
+
+    generated_cpu_utils : List[float] = []
+
+    for bin_index in bin_ordering:
+        bin_mean : float = bin_data[str(bin_index)]["mean"]
+        bin_std : float = bin_data[str(bin_index)]["std"]
+
+        gen_cpu : float = np.random.normal(bin_mean, bin_std)
+        generated_cpu_utils.append(gen_cpu)
+
+    return generated_cpu_utils

@@ -3,7 +3,7 @@ import pandas as pd
 import json
 from scipy.interpolate import interp1d
 from pathlib import Path
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Any
 import math
 import numpy as np
 from sklearn.metrics import r2_score
@@ -135,7 +135,6 @@ class CpuEnergyPair:
             }
 
         return cpu_bin_ordering, cpu_bin_data
-
         
     def compute_poly_regression(self, degree : int) -> Tuple[List[float], float]:
 
@@ -173,6 +172,38 @@ class CpuEnergyPair:
         plt.ylabel("Energy (Watts)")
         plt.show()
 
+    def export_to_json_dict(self, bin_count : int = 10, regression_degree : int = 1):
+    
+        bin_ordering, bin_data = self.compute_cpu_data(bin_count)
+        coefs, r_2 = self.compute_poly_regression(regression_degree)
+
+        json_dict : Dict[str, Any] = {}
+        json_dict = {
+            "bin_ordering" : bin_ordering,
+            "cpu_bins" : bin_data,
+            "regression" : {
+                "coefs" : coefs.tolist(),
+                "r_2" : r_2
+            }
+        }
+
+        return json_dict
+    
+    def export_merged_to_csv(self):
+
+        cpu_name = "cpu"
+        energy_name = "energy"
+
+        if self._cpu_path is not None:
+            cpu_name = Path(self._cpu_path).stem
+        if self._energy_path is not None:
+            energy_name = Path(self._energy_path).stem
+
+        merged_path = f"merged_{cpu_name}_{energy_name}.csv"
+
+        if self._merged_cpu_energy_df is None:
+            self._merged_cpu_energy_df = self.merge_data()
+        self._merged_cpu_energy_df.to_csv(merged_path, index=False)
 
     def _compute_cpu_utilizations(self):
 
