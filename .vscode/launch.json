@@ -1,0 +1,17 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["onboard_2/raw/cpu_util_video1.ssv", "onboard_2/raw/onboard_energy_video1.txt", "onboard_2/raw/cpu_util_video2.ssv", "onboard_2/raw/onboard_energy_video2.txt", "onboard_2/raw/cpu_util_video3.ssv", "onboard_2/raw/onboard_energy_video3.txt"],
+            "justMyCode": true
+        }
+    ]
+}
