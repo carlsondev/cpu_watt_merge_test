@@ -2,6 +2,11 @@ import os
 import pandas as pd
 import json
 from scipy.interpolate import interp1d
+from pathlib import Path
+from typing import List, Dict, Tuple
+import math
+import numpy as np
+from sklearn.metrics import r2_score
 
 class CpuEnergyPair:
 
@@ -35,7 +40,15 @@ class CpuEnergyPair:
         return merged_df
             
 
+    def apply_moving_average(self, window_size : int = 7):
 
+        self._cpu_df["cpu_util"] = self._cpu_df["cpu_util"].rolling(window=window_size).mean()
+        self._cpu_df.dropna(inplace=True)
+
+        self._energy_df["watts"] = self._energy_df["watts"].rolling(window=window_size).mean()
+        self._energy_df.dropna(inplace=True)
+
+        print(f"Applied moving average of window size {window_size} to both CPU and Energy data")
 
     def find_energy_for_cpu_time(self, cpu_time : float) -> float:
         
@@ -88,7 +101,43 @@ class CpuEnergyPair:
         return interp(cpu_time)
         
 
+    def compute_cpu_data(self, bin_count : int) -> Tuple[List[int], Dict[str, Dict[str, float]]]:
 
+        cpu_data = self._cpu_df["cpu_util"].to_list()
+        bin_width = (max(cpu_data) - min(cpu_data)) / bin_count
+
+        cpu_bin_ordering : List[int] = []
+        cpu_bins : Dict[str, List[float]] = {}
+        for util in cpu_data:
+            bin_idx = math.floor((util - min(cpu_data)) / bin_width)
+            cpu_bin_ordering.append(bin_idx)
+            cpu_bins[str(bin_idx)] = cpu_bins.get(str(bin_idx), []) + [util]
+
+        cpu_bin_data : Dict[str, Dict[str, float]] = {}
+        for bin_idx, bin_data in cpu_bins.items():
+            cpu_bin_data[bin_idx] = {
+                "mean": np.mean(bin_data),
+                "std": np.std(bin_data),
+                "n": len(bin_data)
+            }
+
+        return cpu_bin_ordering, cpu_bin_data
+
+        
+    def compute_poly_regression(self, degree : int) -> Tuple[List[float], float]:
+
+        merged_df = self.merge_data()
+
+        cpu_data = merged_df["cpu_util"].to_list()
+        energy_data = merged_df["watts"].to_list()
+
+        
+
+        poly_coefs = np.polyfit(cpu_data, energy_data, degree)
+        poly_fn = np.poly1d(poly_coefs)
+
+        r_2 = r2_score(energy_data, poly_fn(cpu_data))
+        return np.flip(poly_coefs), r_2
 
 
     def _compute_cpu_utilizations(self):
@@ -121,16 +170,20 @@ class CpuEnergyPair:
 
     def _convert_raw_cpu_to_csv(self) -> pd.DataFrame:
 
-        raw_file_name, ext = os.path.splitext(self._raw_cpu_path)
+        raw_path = Path(self._raw_cpu_path)
 
-        if ext == ".csv":
+        if raw_path.suffix == ".csv":
             return pd.read_csv(self._raw_cpu_path)
-        if ext != ".ssv":
+        if raw_path.suffix != ".ssv":
             raise ValueError("CPU data file extension must be .ssv or .csv")
 
-        out_path = raw_file_name + ".csv"
+        out_path = Path(".", raw_path.stem + ".csv")
 
-        with open(self._raw_cpu_path, "r") as in_file, open(out_path, "w") as out_file:
+        if out_path.exists():
+            print(f"Removing existing file: {out_path.as_posix()}")
+            os.remove(out_path.as_posix())
+
+        with open(self._raw_cpu_path, "r") as in_file, open(out_path.as_posix(), "w") as out_file:
             for line in in_file:
                 csv_line = ",".join(line.split())
                 out_file.write(csv_line + "\n")
@@ -141,26 +194,32 @@ class CpuEnergyPair:
     
     def _convert_raw_energy_to_csv(self) -> pd.DataFrame:
 
-        file_name, ext = os.path.splitext(self._raw_energy_path)
+        raw_path = Path(self._raw_energy_path)
 
-        if ext == ".csv":
-            return pd.read_csv(self._raw_energy_path)
-        if ext != ".txt" and ext != ".text":
+        if raw_path.suffix == ".csv":
+            return pd.read_csv(raw_path.as_posix())
+        if raw_path.suffix != ".txt" and raw_path.suffix != ".text":
             raise ValueError("Energy data file extension must be .txt, .text, or .csv")
 
-        out_file_name = file_name + ".csv"
+        out_path = Path(".", raw_path.stem + ".csv")
         key_columns = ["collection_time", "amps", "volts", "watts"]
+
+        if out_path.exists():
+            print(f"Removing existing file: {out_path.as_posix()}")
+            os.remove(out_path.as_posix())
 
         def json_to_csv_line(json_line : str) -> str:
             json_dict = json.loads(json_line)
             values = [str(json_dict[k]) for k in key_columns]
             return ",".join(values) + "\n"
 
-        with open(self._raw_energy_path, "r") as file, open(out_file_name, "a") as out:
+        with open(raw_path.as_posix(), "r") as file, open(out_path.as_posix(), "w") as out:
             out.write(",".join(key_columns) + "\n")
             for json_line in file:
                 out.write(json_to_csv_line(json_line))
 
+        print("Successfully converted from JSON Text to CSV")
 
-        return pd.read_csv(out_file_name)
+
+        return pd.read_csv(out_path.as_posix())
     
