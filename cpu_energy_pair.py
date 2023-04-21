@@ -194,12 +194,15 @@ class CpuEnergyPair:
         cpu_name = "cpu"
         energy_name = "energy"
 
-        if self._cpu_path is not None:
-            cpu_name = Path(self._cpu_path).stem
-        if self._energy_path is not None:
-            energy_name = Path(self._energy_path).stem
+        if self._raw_cpu_path is not None:
+            cpu_name = Path(self._raw_cpu_path).stem
+        if self._raw_energy_path is not None:
+            energy_name = Path(self._raw_energy_path).stem
 
-        merged_path = f"merged_{cpu_name}_{energy_name}.csv"
+        merged_path = f"./merged_{cpu_name}_{energy_name}.csv"
+
+        if os.path.exists(merged_path):
+            os.remove(merged_path)
 
         if self._merged_cpu_energy_df is None:
             self._merged_cpu_energy_df = self.merge_data()

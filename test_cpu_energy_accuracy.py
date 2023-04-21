@@ -8,9 +8,9 @@ def main(cpu_energy_json : str, merged_cpu_energy_csvs : List[str]):
 
     cpu_energy_dict : Dict[str, Any] = json.load(open(cpu_energy_json, "r"))
 
-    regression_dict = cpu_energy_dict["all_data_linear_reg"]
+    #regression_dict = cpu_energy_dict["all_data_linear_reg"]
     
-    total_tester = CpuEnergyPairTester()
+    total_tester = CpuEnergyPairTester(None, None)
 
     cpu_percents : List[float] = []
     watts_percents : List[float] = []

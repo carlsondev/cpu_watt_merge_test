@@ -16,6 +16,7 @@ class CpuEnergyPairTester:
             self._regression_coefs = []
             self._gen_cpu_utils = []
             self._gen_watts = []
+            return
 
         cpu_energy_df : pd.DataFrame = pd.read_csv(merged_data_csv_path)
 
@@ -25,7 +26,7 @@ class CpuEnergyPairTester:
         
         self._regression_coefs = pair_json_data["regression"]["coefs"]
 
-        self._gen_cpu_utils = self._generate_rand_cpu_utils(pair_json_data["bin_ordering"], pair_json_data["bin_data"])
+        self._gen_cpu_utils = self._generate_rand_cpu_utils(pair_json_data["bin_ordering"], pair_json_data["cpu_bins"])
         self._gen_watts = self._generate_watts()
 
 
@@ -66,7 +67,7 @@ class CpuEnergyPairTester:
         return f"{coefs[0]:.2f}e^{coefs[1]:.2f}x"
 
 
-    def _generate_rand_cpu_utils(bin_ordering : int, bin_data : Dict[str, Any]) -> List[float]:
+    def _generate_rand_cpu_utils(self, bin_ordering : int, bin_data : Dict[str, Any]) -> List[float]:
 
         generated_cpu_utils : List[float] = []
 
@@ -75,20 +76,24 @@ class CpuEnergyPairTester:
             bin_std : float = bin_data[str(bin_index)]["std"]
 
             gen_cpu : float = np.random.normal(bin_mean, bin_std)
+
+            gen_cpu = max(0, gen_cpu)
+            gen_cpu = min(100, gen_cpu)
+            
             generated_cpu_utils.append(gen_cpu)
 
         return generated_cpu_utils
     
     def _generate_watts(self) -> List[float]:
         regression = np.poly1d(self._regression_coefs)
-        generated_watts : List[float] = regression(self.gen_cpu_utils)
+        generated_watts : List[float] = regression(self._gen_cpu_utils)
 
         r_sq = r2_score(self._watts, generated_watts)
 
         print(f"Polynomial Regression Eq: {self.poly_reg_str()}, R^2: {r_sq:.2f}")
-        return generated_watts
+        return list(generated_watts)
     
-    def _get_stats(real_data : List[float], pred_data : List[float]) -> Tuple[Tuple[float, float], float]:
+    def _get_stats(self, real_data : List[float], pred_data : List[float]) -> Tuple[Tuple[float, float], float]:
         rmse_error = np.sqrt(mean_squared_error(real_data, pred_data))
         percent_error = (rmse_error / np.max(real_data)) * 100
         corr_matrix = np.corrcoef(real_data, pred_data)
