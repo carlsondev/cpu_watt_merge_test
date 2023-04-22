@@ -23,11 +23,23 @@ class CpuEnergyPairTester:
         self._cpu_utils : List[float] = [row["cpu_util"] for _, row in cpu_energy_df.iterrows()]
         self._watts : List[float] = [row["watts"] for _, row in cpu_energy_df.iterrows()]
 
-        
-        self._regression_coefs = pair_json_data["regression"]["coefs"]
+        regression_dict = pair_json_data["regression"]
+        self._regression_coefs = regression_dict["coefs"]
+        self._regression_stds = regression_dict["poly_stds"]
 
         self._gen_cpu_utils = self._generate_rand_cpu_utils(pair_json_data["bin_ordering"], pair_json_data["cpu_bins"])
-        self._gen_watts = self._generate_watts()
+        rmse_error : List[float] = []
+        for i in range(1, len(self._gen_cpu_utils)):
+            self._gen_watts, rmse = self._generate_watts(use_poly_stds=True, std_period=i)
+            rmse_error.append(rmse)
+
+        print(f"Min RMSE: {min(rmse_error)}")
+        min_index = rmse_error.index(min(rmse_error))
+        print(f"Index of Min RMSE: {min_index}")
+        _, rmse = self._generate_watts(use_poly_stds=False, std_period=i)
+        print(f"RMSE without poly stds: {rmse}")
+
+        self._gen_watts, _ = self._generate_watts(use_poly_stds=True, std_period=min_index)
 
 
     def get_utilization_stats(self) -> Tuple[Tuple[float, float], float]:
@@ -84,14 +96,24 @@ class CpuEnergyPairTester:
 
         return generated_cpu_utils
     
-    def _generate_watts(self) -> List[float]:
+    def _generate_watts(self, use_poly_stds : bool, std_period : int) -> Tuple[List[float], float]:
         regression = np.poly1d(self._regression_coefs)
         generated_watts : List[float] = regression(self._gen_cpu_utils)
 
-        r_sq = r2_score(self._watts, generated_watts)
+        if use_poly_stds:
+                for idx, cpu_util in enumerate(self._gen_cpu_utils):
+
+                    if idx % std_period != 0:
+                        continue
+
+                    cpu_std_idx = int(cpu_util) if cpu_util < 100 else 99
+                    generated_watts[idx] += np.random.normal(0, self._regression_stds[cpu_std_idx])
+
+
+        (rmse_error, percent_error), r_sq = self._get_stats(self._watts, generated_watts)
 
         print(f"Polynomial Regression Eq: {self.poly_reg_str()}, R^2: {r_sq:.2f}")
-        return list(generated_watts)
+        return list(generated_watts), rmse_error
     
     def _get_stats(self, real_data : List[float], pred_data : List[float]) -> Tuple[Tuple[float, float], float]:
         rmse_error = np.sqrt(mean_squared_error(real_data, pred_data))
