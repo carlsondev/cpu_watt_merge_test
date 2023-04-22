@@ -32,7 +32,8 @@ def main(cpu_energy_path_pairs : List[Tuple[str, str]]):
             continue
         total_cpu_energy_data += cpu_energy_pair
 
-    total_cpu_energy_data.merge_data()
+    if len(cpu_energy_pairs) > 1:
+        total_cpu_energy_data.merge_data()
 
     json_dict["all_data"] = total_cpu_energy_data.export_to_json_dict(bin_count, reg_degree)
 

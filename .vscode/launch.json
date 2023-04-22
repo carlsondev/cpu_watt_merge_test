@@ -5,13 +5,26 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "Python: Test Accuracy",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "${workspaceFolder}/test_cpu_energy_accuracy.py",
             "console": "integratedTerminal",
-            "args": ["onboard_2/raw/cpu_util_video1.ssv", "onboard_2/raw/onboard_energy_video1.txt", "onboard_2/raw/cpu_util_video2.ssv", "onboard_2/raw/onboard_energy_video2.txt", "onboard_2/raw/cpu_util_video3.ssv", "onboard_2/raw/onboard_energy_video3.txt"],
-            "justMyCode": true
+            "args": [
+                "cpu_energy_data.json",
+                "merged_cpu_util_energy.csv"
+            ]
+        },
+        {
+            "name": "Python: Merge",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/compute_cpu_energy.py",
+            "console": "integratedTerminal",
+            "args": [
+                "rpi_data/raw/cpu_util.ssv",
+                "rpi_data/raw/energy.txt"
+            ]
         }
     ]
 }

@@ -136,7 +136,7 @@ class CpuEnergyPair:
 
         return cpu_bin_ordering, cpu_bin_data
         
-    def compute_poly_regression(self, degree : int) -> Tuple[List[float], float]:
+    def compute_poly_regression(self, degree : int) -> Tuple[List[float], float, List[float]]:
 
         if self._merged_cpu_energy_df is None:
             self._merged_cpu_energy_df = self.merge_data()
@@ -148,7 +148,23 @@ class CpuEnergyPair:
         poly_fn = np.poly1d(poly_coefs)
 
         r_2 = r2_score(energy_data, poly_fn(cpu_data))
-        return poly_coefs, r_2
+
+
+        # Compute STD for energy from 0-99
+        polynomial_stds = []
+        cpu_std_bins : Dict[int, List[float]] = {}
+
+        for cpu_val, energy_val in zip(cpu_data, energy_data):
+            idx = int(cpu_val) if cpu_val < 100 else 99
+            cpu_std_bins[idx] = cpu_std_bins.get(idx, []) + [energy_val]
+
+        for i in range(100):
+            if i not in cpu_std_bins:
+                polynomial_stds.append(0)
+                continue
+            polynomial_stds.append(np.std(cpu_std_bins[i]))
+
+        return poly_coefs, r_2, polynomial_stds
 
 
     def plot(self, regression : bool = False, degree : int = 1):
@@ -162,10 +178,20 @@ class CpuEnergyPair:
         plt.scatter(cpu_data, energy_data)
 
         if regression:
-            poly_coefs, r_2 = self.compute_poly_regression(degree)
+            poly_coefs, r_2, poly_stds = self.compute_poly_regression(degree)
             poly_fn = np.poly1d(poly_coefs)
 
-            plt.plot(cpu_data, poly_fn(cpu_data), color="red", label=f"Degree {degree} Polynomial Fit (R^2 = {r_2:.2f})")
+            comp_watts = poly_fn(cpu_data)
+
+            plt.plot(cpu_data, comp_watts, color="red", label=f"Degree {degree} Polynomial Fit (R^2 = {r_2:.2f})")
+
+            energy_stds : np.ndarray = np.array(poly_stds)
+            comp_watts_stds = poly_fn(np.array(range(100)))
+            plt.fill_between(np.arange(0.5, 100.5, 1), comp_watts_stds - energy_stds, comp_watts_stds + energy_stds, color="orange", alpha=0.8, label="Standard Deviation")
+            plt.fill_between(np.arange(0.5, 100.5, 1), comp_watts_stds - energy_stds * 2, comp_watts_stds + energy_stds * 2, color="orange", alpha=0.4, label="2x Standard Deviation")
+
+            # for x in range(101):
+            #     plt.axvline(x = x, color = 'b')
             plt.legend()
 
         plt.xlabel("CPU Utilization (%)")
@@ -175,7 +201,7 @@ class CpuEnergyPair:
     def export_to_json_dict(self, bin_count : int = 10, regression_degree : int = 1):
     
         bin_ordering, bin_data = self.compute_cpu_data(bin_count)
-        coefs, r_2 = self.compute_poly_regression(regression_degree)
+        coefs, r_2, poly_stds = self.compute_poly_regression(regression_degree)
 
         json_dict : Dict[str, Any] = {}
         json_dict = {
@@ -183,6 +209,7 @@ class CpuEnergyPair:
             "cpu_bins" : bin_data,
             "regression" : {
                 "coefs" : coefs.tolist(),
+                "poly_stds" : poly_stds,
                 "r_2" : r_2
             }
         }
