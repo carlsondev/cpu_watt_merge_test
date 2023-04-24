@@ -1,0 +1,63 @@
+Polynomial Regression Eq: 4.80 + 0.00x, R^2: 0.00
+RMSE without poly stds: 0.5719594655817359
+Polynomial Regression Eq: 4.80 + 0.00x, R^2: 0.00
+Video 1 CPU   RMSE: 0.643, 0.85%, R^2: 0.981
+Video 1 Watts RMSE: 0.572, 9.55%, R^2: 0.000
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 3.19 + 0.02x, R^2: 0.02
+RMSE without poly stds: 0.7284821909130896
+Polynomial Regression Eq: 3.19 + 0.02x, R^2: 0.02
+Video 2 CPU   RMSE: 2.785, 3.19%, R^2: 0.387
+Video 2 Watts RMSE: 0.728, 12.29%, R^2: 0.016
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 3.96 + 0.02x, R^2: 0.05
+RMSE without poly stds: 0.47825442576941096
+Polynomial Regression Eq: 3.96 + 0.02x, R^2: 0.05
+Video 3 CPU   RMSE: 2.496, 3.07%, R^2: 0.852
+Video 3 Watts RMSE: 0.478, 7.97%, R^2: 0.049
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 3.27 + 0.02x, R^2: 0.12
+RMSE without poly stds: 0.18109579880466858
+Polynomial Regression Eq: 3.27 + 0.02x, R^2: 0.12
+Video 4 CPU   RMSE: 1.060, 3.89%, R^2: 0.913
+Video 4 Watts RMSE: 0.181, 4.77%, R^2: 0.124
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 3.73 + 0.01x, R^2: 0.04
+RMSE without poly stds: 0.2063180553031921
+Polynomial Regression Eq: 3.73 + 0.01x, R^2: 0.04
+Video 5 CPU   RMSE: 1.897, 3.16%, R^2: 0.887
+Video 5 Watts RMSE: 0.206, 4.97%, R^2: 0.042
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 3.06 + 0.03x, R^2: 0.41
+RMSE without poly stds: 0.22704528641962113
+Polynomial Regression Eq: 3.06 + 0.03x, R^2: 0.41
+Video 6 CPU   RMSE: 1.045, 3.55%, R^2: 0.969
+Video 6 Watts RMSE: 0.227, 5.96%, R^2: 0.407
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 3.39 + 0.01x, R^2: 0.09
+RMSE without poly stds: 0.23383481818067994
+Polynomial Regression Eq: 3.39 + 0.01x, R^2: 0.09
+Video 7 CPU   RMSE: 1.537, 3.95%, R^2: 0.938
+Video 7 Watts RMSE: 0.234, 5.55%, R^2: 0.094
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 3.37 + 0.02x, R^2: 0.07
+RMSE without poly stds: 0.35180966600569286
+Polynomial Regression Eq: 3.37 + 0.02x, R^2: 0.07
+Video 8 CPU   RMSE: 2.385, 3.75%, R^2: 0.878
+Video 8 Watts RMSE: 0.352, 7.82%, R^2: 0.068
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 3.13 + 0.02x, R^2: 0.31
+RMSE without poly stds: 0.325053000080543
+Polynomial Regression Eq: 3.13 + 0.02x, R^2: 0.31
+Video 9 CPU   RMSE: 1.436, 3.53%, R^2: 0.980
+Video 9 Watts RMSE: 0.325, 7.71%, R^2: 0.314
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 2.51 + -0.00x, R^2: 0.00
+RMSE without poly stds: 0.06073406747313605
+Polynomial Regression Eq: 2.51 + -0.00x, R^2: 0.00
+Video 10 CPU   RMSE: 0.202, 4.13%, R^2: 0.966
+Video 10 Watts RMSE: 0.061, 2.07%, R^2: 0.003
+----------------------------------------------------------------------------------------------------
+Overall CPU   RMSE: 1.857, 2.13%, R^2: 0.99
+Overall Watts RMSE: 0.435, 7.26%, R^2: 0.76
+Average CPU Percent: 3.31%, Average Watts Percent: 6.87%

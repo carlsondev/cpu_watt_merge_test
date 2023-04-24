@@ -23,24 +23,19 @@ class CpuEnergyPairTester:
         self._cpu_utils : List[float] = [row["cpu_util"] for _, row in cpu_energy_df.iterrows()]
         self._watts : List[float] = [row["watts"] for _, row in cpu_energy_df.iterrows()]
 
-        regression_dict = pair_json_data["regression"]
-        self._regression_coefs = regression_dict["coefs"]
-        self._regression_stds = regression_dict["poly_stds"]
+        self.generate_cpu_watts(pair_json_data, test_poly_stds=True)
 
-        self._gen_cpu_utils = self._generate_rand_cpu_utils(pair_json_data["bin_ordering"], pair_json_data["cpu_bins"])
-        rmse_error : List[float] = []
-        # for i in range(1, len(self._gen_cpu_utils)):
-        #     self._gen_watts, rmse = self._generate_watts(use_poly_stds=True, std_period=i)
-        #     rmse_error.append(rmse)
+    def _find_best_poly_std_period(self) -> Tuple[int, float]:
+        min_rmse = float("inf")
+        min_index = 0
+        for i in range(1, len(self._gen_cpu_utils)):
+            _, rmse = self._generate_watts(use_poly_stds=True, std_period=i, print_reg=False)
+            if rmse < min_rmse:
+                min_rmse = rmse
+                min_index = i
 
-        # print(f"Min RMSE: {min(rmse_error)}")
-        # min_index = rmse_error.index(min(rmse_error))
-        # print(f"Index of Min RMSE: {min_index}")
-        # _, rmse = self._generate_watts(use_poly_stds=False, std_period=i)
-        # print(f"RMSE without poly stds: {rmse}")
-
-        self._gen_watts, _ = self._generate_watts(use_poly_stds=False, std_period=1)
-
+        print(f"Best poly std period: {min_index} ({(min_index/len(self._gen_cpu_utils))*100}%), RMSE: {min_rmse}")
+        return min_index, min_rmse
 
     def get_utilization_stats(self) -> Tuple[Tuple[float, float], float]:
         return self._get_stats(self._cpu_utils, self._gen_cpu_utils)
@@ -96,7 +91,7 @@ class CpuEnergyPairTester:
 
         return generated_cpu_utils
     
-    def _generate_watts(self, use_poly_stds : bool, std_period : int) -> Tuple[List[float], float]:
+    def _generate_watts(self, use_poly_stds : bool, std_period : int = 1, print_reg : bool = True) -> Tuple[List[float], float]:
         regression = np.poly1d(self._regression_coefs)
         generated_watts : List[float] = regression(self._gen_cpu_utils)
 
@@ -112,7 +107,8 @@ class CpuEnergyPairTester:
 
         (rmse_error, percent_error), r_sq = self._get_stats(self._watts, generated_watts)
 
-        print(f"Polynomial Regression Eq: {self.poly_reg_str()}, R^2: {r_sq:.2f}")
+        if print_reg:
+            print(f"Polynomial Regression Eq: {self.poly_reg_str()}, R^2: {r_sq:.2f}")
         return list(generated_watts), rmse_error
     
     def _get_stats(self, real_data : List[float], pred_data : List[float]) -> Tuple[Tuple[float, float], float]:
@@ -121,6 +117,29 @@ class CpuEnergyPairTester:
         corr_matrix = np.corrcoef(real_data, pred_data)
         r_sq = corr_matrix[0,1]**2
         return (rmse_error, percent_error), r_sq
+    
+
+    def generate_cpu_watts(self, json_dict : Dict[str, Any], test_poly_stds : bool = False) -> None:
+        regression_dict = json_dict["regression"]
+        self._regression_coefs = regression_dict["coefs"]
+        self._regression_stds = regression_dict["poly_stds"]
+
+        self._gen_cpu_utils = self._generate_rand_cpu_utils(json_dict["bin_ordering"], json_dict["cpu_bins"])
+
+        lin_gen_watts, lin_rmse = self._generate_watts(use_poly_stds=False)
+
+        if not test_poly_stds:
+            self._gen_watts = lin_gen_watts
+            return
+
+        best_poly_std_period, best_poly_rmse = self._find_best_poly_std_period()
+
+        use_poly_stds = best_poly_rmse < lin_rmse
+        if use_poly_stds:
+            print(f"The model using polynomial stds is better (by {((lin_rmse - best_poly_rmse)/lin_rmse)*100:.3f}%), using that one.")
+            self._gen_watts, _ = self._generate_watts(use_poly_stds=use_poly_stds, std_period=best_poly_std_period)
+            return
+        self._gen_watts = lin_gen_watts
     
 
     def __add__(self, other : "CpuEnergyPairTester") -> "CpuEnergyPairTester":

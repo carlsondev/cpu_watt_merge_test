@@ -23,6 +23,8 @@ class CpuEnergyPair:
             self._cpu_df = self._convert_raw_cpu_to_csv()
             self._compute_cpu_utilizations()
 
+        # Add one hour for daylight savings time
+        self._cpu_df["collection_time"] = self._cpu_df["collection_time"] + 3600
 
         if energy_df is not None:
             self._energy_df = energy_df
@@ -109,7 +111,14 @@ class CpuEnergyPair:
 
         interp = interp1d(neighboring_times, neighboring_watts)
 
-        return interp(cpu_time)
+        try:
+            return interp(cpu_time)
+        except ValueError as e:
+            print("Failed to find energy for CPU time")
+            print(f"CPU time: {cpu_time}")
+            print(f"Neighboring times: {neighboring_times}")
+            print(f"Neighboring watts: {neighboring_watts}")
+            raise e
         
 
     def compute_cpu_data(self, bin_count : int) -> Tuple[List[int], Dict[str, Dict[str, float]]]:
@@ -328,5 +337,9 @@ class CpuEnergyPair:
         
         new_cpu_df = pd.concat([self._cpu_df, other._cpu_df], ignore_index=True, sort=False)
         new_energy_df = pd.concat([self._energy_df, other._energy_df], ignore_index=True, sort=False)
+        new_merged_df = pd.concat([self._merged_cpu_energy_df, other._merged_cpu_energy_df], ignore_index=True, sort=False)
 
-        return CpuEnergyPair(cpu_df=new_cpu_df, energy_df=new_energy_df)
+
+        pair = CpuEnergyPair(cpu_df=new_cpu_df, energy_df=new_energy_df)
+        pair._merged_cpu_energy_df = new_merged_df
+        return pair

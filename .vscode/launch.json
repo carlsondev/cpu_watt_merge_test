@@ -19,11 +19,30 @@
             "name": "Python: Merge",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/compute_cpu_energy.py",
+            "program": "${workspaceFolder}/programs/compute_cpu_energy.py",
+            "cwd": "${workspaceFolder}/temp",
             "console": "integratedTerminal",
             "args": [
-                "rpi_data/raw/cpu_util.ssv",
-                "rpi_data/raw/energy.txt"
+                "../MastersData/onboard/video1_cpu_util.ssv",
+                "../MastersData/onboard/onboard_video1_energy.txt",
+                "../MastersData/onboard/video2_cpu_util.ssv",
+                "../MastersData/onboard/onboard_video2_energy.txt",
+                "../MastersData/onboard/video3_cpu_util.ssv",
+                "../MastersData/onboard/onboard_video3_energy.txt",
+                "../MastersData/full/video1_cpu_util.ssv",
+                "../MastersData/full/full_video1_energy.txt",
+                "../MastersData/full/video2_cpu_util.ssv",
+                "../MastersData/full/full_video2_energy.txt",
+                "../MastersData/full/video3_cpu_util.ssv",
+                "../MastersData/full/full_video3_energy.txt",
+                "../MastersData/partial/video1_ssim_cpu_util.ssv",
+                "../MastersData/partial/partial_ssim_video1_energy.txt",
+                "../MastersData/partial/video2_ssim_cpu_util.ssv",
+                "../MastersData/partial/partial_ssim_video2_energy.txt",
+                "../MastersData/partial/video3_ssim_cpu_util.ssv",
+                "../MastersData/partial/partial_ssim_video3_energy.txt",
+                "../MastersData/idle/cpu_util.ssv",
+                "../MastersData/idle/idle_energy.txt"
             ]
         }
     ]

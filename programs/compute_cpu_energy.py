@@ -21,7 +21,7 @@ def main(cpu_energy_path_pairs : List[Tuple[str, str]]):
     
     for pair_idx in range(len(cpu_energy_pairs)):
         cpu_energy_pair = cpu_energy_pairs[pair_idx]
-        cpu_energy_pair.apply_moving_average()
+        cpu_energy_pair.apply_moving_average(10)
         cpu_energy_pair.merge_data()
 
         json_dict[f"pair_{pair_idx+1}"] = cpu_energy_pair.export_to_json_dict(bin_count, reg_degree)
@@ -32,8 +32,8 @@ def main(cpu_energy_path_pairs : List[Tuple[str, str]]):
             continue
         total_cpu_energy_data += cpu_energy_pair
 
-    if len(cpu_energy_pairs) > 1:
-        total_cpu_energy_data.merge_data()
+    # if len(cpu_energy_pairs) > 1:
+    #     total_cpu_energy_data.merge_data()
 
     json_dict["all_data"] = total_cpu_energy_data.export_to_json_dict(bin_count, reg_degree)
 

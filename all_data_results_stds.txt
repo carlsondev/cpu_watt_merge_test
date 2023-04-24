@@ -1,0 +1,87 @@
+Polynomial Regression Eq: 4.80 + 0.00x, R^2: 0.00
+RMSE without poly stds: 0.5719636175252776
+Best poly std period: 865 (23.770266556746357%), RMSE: 0.5709928739072421
+The model using polynomial stds is better, using that one.
+Polynomial Regression Eq: 4.80 + 0.00x, R^2: 0.00
+Video 1 CPU   RMSE: 0.629, 0.83%, R^2: 0.982
+Video 1 Watts RMSE: 0.572, 9.56%, R^2: 0.001
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 3.19 + 0.02x, R^2: 0.01
+RMSE without poly stds: 0.7303776208311638
+Best poly std period: 480 (11.222819733458032%), RMSE: 0.7299489086909204
+The model using polynomial stds is better, using that one.
+Polynomial Regression Eq: 3.19 + 0.02x, R^2: 0.01
+Video 2 CPU   RMSE: 2.789, 3.19%, R^2: 0.387
+Video 2 Watts RMSE: 0.731, 12.34%, R^2: 0.009
+----------------------------------------------------------------------------------------------------
+^CTraceback (most recent call last):
+  File "/usr/local/lib/python3.9/site-packages/matplotlib/backend_bases.py", line 1921, in enter_notify_event
+    def enter_notify_event(self, guiEvent=None, xy=None):
+KeyboardInterrupt
+Polynomial Regression Eq: 3.96 + 0.02x, R^2: 0.05
+RMSE without poly stds: 0.47909475745813923
+Best poly std period: 82 (4.704532415375788%), RMSE: 0.4782601672328149
+The model using polynomial stds is better, using that one.
+Polynomial Regression Eq: 3.96 + 0.02x, R^2: 0.03
+Video 3 CPU   RMSE: 2.457, 3.02%, R^2: 0.858
+Video 3 Watts RMSE: 0.483, 8.04%, R^2: 0.034
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 3.27 + 0.02x, R^2: 0.12
+RMSE without poly stds: 0.18164861399718965
+Best poly std period: 1317 (98.57784431137725%), RMSE: 0.1810617451310465
+The model using polynomial stds is better, using that one.
+Polynomial Regression Eq: 3.27 + 0.02x, R^2: 0.12
+Video 4 CPU   RMSE: 1.093, 4.01%, R^2: 0.908
+Video 4 Watts RMSE: 0.182, 4.79%, R^2: 0.117
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 3.73 + 0.01x, R^2: 0.05
+RMSE without poly stds: 0.20575838424926698
+Best poly std period: 698 (43.87177875549968%), RMSE: 0.20488253653568922
+The model using polynomial stds is better, using that one.
+Polynomial Regression Eq: 3.73 + 0.01x, R^2: 0.05
+Video 5 CPU   RMSE: 1.905, 3.17%, R^2: 0.887
+Video 5 Watts RMSE: 0.206, 4.95%, R^2: 0.047
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 3.06 + 0.03x, R^2: 0.41
+RMSE without poly stds: 0.22682090807739144
+Best poly std period: 138 (18.01566579634465%), RMSE: 0.22578060495918137
+The model using polynomial stds is better, using that one.
+Polynomial Regression Eq: 3.06 + 0.03x, R^2: 0.40
+Video 6 CPU   RMSE: 1.049, 3.56%, R^2: 0.969
+Video 6 Watts RMSE: 0.229, 6.00%, R^2: 0.400
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 3.39 + 0.01x, R^2: 0.10
+RMSE without poly stds: 0.2335104411329662
+Best poly std period: 2064 (59.982563208369655%), RMSE: 0.2326867712771354
+The model using polynomial stds is better, using that one.
+Polynomial Regression Eq: 3.39 + 0.01x, R^2: 0.09
+Video 7 CPU   RMSE: 1.504, 3.87%, R^2: 0.941
+Video 7 Watts RMSE: 0.234, 5.55%, R^2: 0.094
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 3.37 + 0.02x, R^2: 0.07
+RMSE without poly stds: 0.3513231405232561
+Best poly std period: 2415 (57.40432612312812%), RMSE: 0.3505550979559059
+The model using polynomial stds is better, using that one.
+Polynomial Regression Eq: 3.37 + 0.02x, R^2: 0.07
+Video 8 CPU   RMSE: 2.344, 3.69%, R^2: 0.882
+Video 8 Watts RMSE: 0.351, 7.80%, R^2: 0.072
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 3.13 + 0.02x, R^2: 0.31
+RMSE without poly stds: 0.3255627270129163
+Best poly std period: 199 (8.32984512348263%), RMSE: 0.3247353663840423
+The model using polynomial stds is better, using that one.
+Polynomial Regression Eq: 3.13 + 0.02x, R^2: 0.31
+Video 9 CPU   RMSE: 1.435, 3.53%, R^2: 0.980
+Video 9 Watts RMSE: 0.326, 7.73%, R^2: 0.310
+----------------------------------------------------------------------------------------------------
+Polynomial Regression Eq: 2.51 + -0.00x, R^2: 0.00
+RMSE without poly stds: 0.06072277546927685
+Best poly std period: 2513 (86.71497584541062%), RMSE: 0.06031221793139596
+The model using polynomial stds is better, using that one.
+Polynomial Regression Eq: 2.51 + -0.00x, R^2: 0.00
+Video 10 CPU   RMSE: 0.203, 4.16%, R^2: 0.966
+Video 10 Watts RMSE: 0.061, 2.07%, R^2: 0.003
+----------------------------------------------------------------------------------------------------
+Overall CPU   RMSE: 1.844, 2.11%, R^2: 0.99
+Overall Watts RMSE: 0.436, 7.27%, R^2: 0.76
+Average CPU Percent: 3.30%, Average Watts Percent: 6.89%
