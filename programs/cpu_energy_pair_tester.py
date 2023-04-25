@@ -118,13 +118,23 @@ class CpuEnergyPairTester:
         r_sq = corr_matrix[0,1]**2
         return (rmse_error, percent_error), r_sq
     
+    # Coefficents in the order of b_0, b_1, b_2, ..., b_n
+    def test_custom_reg(self, reg_coefs : List[float]):
 
-    def generate_cpu_watts(self, json_dict : Dict[str, Any], test_poly_stds : bool = False) -> None:
+        reg_dict = {
+            "coefs" : list(reversed(reg_coefs)),
+            "poly_stds" : []
+        }
+
+        self.generate_cpu_watts({"regression" : reg_dict}, test_poly_stds=False, do_generate_cpu=False)
+
+    def generate_cpu_watts(self, json_dict : Dict[str, Any], test_poly_stds : bool = False, do_generate_cpu : bool = True) -> None:
         regression_dict = json_dict["regression"]
         self._regression_coefs = regression_dict["coefs"]
         self._regression_stds = regression_dict["poly_stds"]
 
-        self._gen_cpu_utils = self._generate_rand_cpu_utils(json_dict["bin_ordering"], json_dict["cpu_bins"])
+        if do_generate_cpu:
+            self._gen_cpu_utils = self._generate_rand_cpu_utils(json_dict["bin_ordering"], json_dict["cpu_bins"])
 
         lin_gen_watts, lin_rmse = self._generate_watts(use_poly_stds=False)
 

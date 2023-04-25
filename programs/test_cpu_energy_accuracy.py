@@ -39,7 +39,21 @@ def main(cpu_energy_json : str, merged_cpu_energy_csvs : List[str]):
 
         total_tester += pair_tester
 
-    total_tester.generate_cpu_watts(cpu_energy_dict["all_data"], test_poly_stds=True)
+    # Power Pi
+    #total_tester.test_custom_reg([1.5778, 0.181 / 100])
+
+    # Software Power Model for Linux Single Board Computers
+    #total_tester.test_custom_reg([1.722, 0.01048])
+
+    # A Power Model for Monitoring Environmental Parameters on the Edge
+    #total_tester.test_custom_reg([1.6249, 0.0081]) Ard1
+    #total_tester.test_custom_reg([1.8029, 0.0108]) Ard2
+
+    # A Preliminary Study of the Energy Impact of Software in Raspberry Pi devices
+    #total_tester.test_custom_reg([4.142, 2.1514 / 100])
+
+
+    #total_tester.generate_cpu_watts(cpu_energy_dict["all_data"], test_poly_stds=True)
 
     (rmse_cpu_error, percent_error_cpu), r_sq_cpu = total_tester.get_utilization_stats()
     (rmse_watts_error, percent_error_watts), r_sq_watts = total_tester.get_watts_stats()
