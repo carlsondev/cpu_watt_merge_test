@@ -27,6 +27,8 @@ def main(cpu_energy_path_pairs : List[Tuple[str, str]]):
         json_dict[f"pair_{pair_idx+1}"] = cpu_energy_pair.export_to_json_dict(bin_count, reg_degree)
         cpu_energy_pair.export_merged_to_csv()
 
+        cpu_energy_pair.plot_cpu_bins()
+
         if total_cpu_energy_data is None:
             total_cpu_energy_data = cpu_energy_pair
             continue

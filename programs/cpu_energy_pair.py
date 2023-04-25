@@ -175,6 +175,18 @@ class CpuEnergyPair:
 
         return poly_coefs, r_2, polynomial_stds
 
+    def plot_cpu_bins(self, bin_count : int = 10):
+        cpu_data = self._merged_cpu_energy_df["cpu_util"].to_list()
+
+        cpu_bin_ordering, cpu_bin_data = self.compute_cpu_data(bin_count)
+
+        cpu_bin_width = (max(cpu_data) - min(cpu_data)) / bin_count
+
+        plt.plot(cpu_data, "-",color="#ff8c00", label="CPU Utilization")
+        for y_val in np.arange(min(cpu_data), max(cpu_data)+(cpu_bin_width/100), cpu_bin_width):
+            plt.axhline(y=y_val, color="gray", linestyle="--", linewidth=1)
+
+        plt.show()
 
     def plot(self, regression : bool = False, degree : int = 1):
 

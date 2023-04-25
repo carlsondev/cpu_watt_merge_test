@@ -23,7 +23,7 @@ class CpuEnergyPairTester:
         self._cpu_utils : List[float] = [row["cpu_util"] for _, row in cpu_energy_df.iterrows()]
         self._watts : List[float] = [row["watts"] for _, row in cpu_energy_df.iterrows()]
 
-        self.generate_cpu_watts(pair_json_data, test_poly_stds=True)
+        self.generate_cpu_watts(pair_json_data, test_poly_stds=False)
 
     def _find_best_poly_std_period(self) -> Tuple[int, float]:
         min_rmse = float("inf")
