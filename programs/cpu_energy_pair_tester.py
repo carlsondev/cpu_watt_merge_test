@@ -27,6 +27,10 @@ class CpuEnergyPairTester:
         self.generate_cpu_watts(pair_json_data, test_poly_stds=False)
 
     def _find_best_poly_std_period(self) -> Tuple[int, float]:
+        '''
+        Find the best period to use for the polynomial energy standard deviations.
+        '''
+
         min_rmse = float("inf")
         min_index = 0
         for i in range(1, len(self._gen_cpu_utils)):
@@ -39,18 +43,34 @@ class CpuEnergyPairTester:
         return min_index, min_rmse
 
     def get_utilization_stats(self) -> Tuple[Tuple[float, float], float]:
+        '''
+        Get statistics between the real and predicted CPU utilization.
+        :return: Tuple of (rmse_error, percent_error), r_squared
+        :rtype: Tuple[Tuple[float, float], float]
+        '''
         return self._get_stats(self._cpu_utils, self._gen_cpu_utils)
     
     def get_watts_stats(self) -> Tuple[Tuple[float, float], float]:
+        '''
+        Get statistics between the real and predicted watts.
+        :return: Tuple of (rmse_error, percent_error), r_squared
+        :rtype: Tuple[Tuple[float, float], float]
+        '''
         return self._get_stats(self._watts, self._gen_watts)
     
     def plot_cpu_utilization(self):
+        '''
+        Plot the real and predicted CPU utilization.
+        '''
         plt.plot(list(range(len(self._cpu_utils))), self._cpu_utils, label="Real CPU Utilization")
         plt.plot(list(range(len(self._gen_cpu_utils))), self._gen_cpu_utils, label="Predicted CPU Utilization")
         plt.legend()
         plt.show()
 
     def plot_watts(self):
+        '''
+        Plot the real and predicted watts.
+        '''
         plt.plot(list(range(len(self._watts))), self._watts, label="Real Watts")
         plt.plot(list(range(len(self._gen_watts))), self._gen_watts, label="Predicted Watts")
         plt.legend(fontsize=30)
@@ -60,7 +80,9 @@ class CpuEnergyPairTester:
         plt.show()
 
     def poly_reg_str(self) -> str:
-
+        '''
+        Get the polynomial regression equation as a string.
+        '''
         coefs : List[float] = list(reversed(self._regression_coefs))
         ret_str : str = ""
         for i in range(len(coefs)):
@@ -79,7 +101,15 @@ class CpuEnergyPairTester:
 
 
     def _generate_rand_cpu_utils(self, bin_ordering : int, bin_data : Dict[str, Any]) -> List[float]:
-
+        '''
+        Generate random CPU utilization values based on the bin data.
+        :param bin_ordering: The ordering of the bins to generate the CPU utilization values.
+        :type bin_ordering: int
+        :param bin_data: The bin data to use to generate the CPU utilization values.
+        :type bin_data: Dict[str, Any]
+        :return: The generated CPU utilization values.
+        :rtype: List[float]
+        '''
         generated_cpu_utils : List[float] = []
 
         for bin_index in bin_ordering:
@@ -96,6 +126,19 @@ class CpuEnergyPairTester:
         return generated_cpu_utils
     
     def _generate_watts(self, use_poly_stds : bool, std_period : int = 1, print_reg : bool = True) -> Tuple[List[float], float]:
+        '''
+        Generate the predicted watts based on the stored generated CPU utilization values.
+        :param use_poly_stds: Whether to use the polynomial energy standard deviations.
+        :type use_poly_stds: bool
+        :param std_period: The period to use for the polynomial energy standard deviations.
+        :type std_period: int
+        :param print_reg: Whether to print the regression equation.
+        :type print_reg: bool
+        :return: The generated watts and the RMSE error.
+        :rtype: Tuple[List[float], float]
+        '''
+
+
         regression = np.poly1d(self._regression_coefs)
         generated_watts : List[float] = regression(self._gen_cpu_utils)
 
@@ -116,6 +159,16 @@ class CpuEnergyPairTester:
         return list(generated_watts), rmse_error
     
     def _get_stats(self, real_data : List[float], pred_data : List[float]) -> Tuple[Tuple[float, float], float]:
+        '''
+        Get the statistics between the real and predicted data.
+        :param real_data: The real data.
+        :type real_data: List[float]
+        :param pred_data: The predicted data.
+        :type pred_data: List[float]
+        :return: Tuple of (rmse_error, percent_error), r_squared
+        :rtype: Tuple[Tuple[float, float], float]
+        '''
+
         rmse_error = np.sqrt(mean_squared_error(real_data, pred_data))
         percent_error = (rmse_error / np.max(real_data)) * 100
         corr_matrix = np.corrcoef(real_data, pred_data)
@@ -124,7 +177,11 @@ class CpuEnergyPairTester:
     
     # Coefficents in the order of b_0, b_1, b_2, ..., b_n
     def test_custom_reg(self, reg_coefs : List[float]):
-
+        '''
+        Pass custom regression coefficients to generate the predicted watts (useful for testing other papers)
+        :param reg_coefs: The regression coefficients.
+        :type reg_coefs: List[float]
+        '''
         reg_dict = {
             "coefs" : list(reversed(reg_coefs)),
             "poly_stds" : []
@@ -133,6 +190,16 @@ class CpuEnergyPairTester:
         self.generate_cpu_watts({"regression" : reg_dict}, test_poly_stds=False, do_generate_cpu=False)
 
     def generate_cpu_watts(self, json_dict : Dict[str, Any], test_poly_stds : bool = False, do_generate_cpu : bool = True) -> None:
+        '''
+        Generate predicted watts based on the JSON dictionary.
+        :param json_dict: The JSON dictionary containing the regression coefficients and CPU generation data.
+        :type json_dict: Dict[str, Any]
+        :param test_poly_stds: Whether to test for the best polynomial standard deviation period.
+        :type test_poly_stds: bool
+        :param do_generate_cpu: Whether to generate the CPU utilization values.
+        :type do_generate_cpu: bool
+        '''
+
         regression_dict = json_dict["regression"]
         self._regression_coefs = regression_dict["coefs"]
         self._regression_stds = regression_dict["poly_stds"]
@@ -157,6 +224,13 @@ class CpuEnergyPairTester:
     
 
     def __add__(self, other : "CpuEnergyPairTester") -> "CpuEnergyPairTester":
+        '''
+        Add two CpuEnergyPairTester objects together (the raw values and generated values)
+        :param other: The other CpuEnergyPairTester object.
+        :type other: CpuEnergyPairTester
+        :return: The sum of the two CpuEnergyPairTester objects.
+        :rtype: CpuEnergyPairTester
+        '''
         tester = CpuEnergyPairTester(None, None)
         tester._cpu_utils = self._cpu_utils + other._cpu_utils
         tester._watts = self._watts + other._watts

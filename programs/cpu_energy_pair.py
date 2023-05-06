@@ -35,7 +35,9 @@ class CpuEnergyPair:
 
 
     def merge_data(self) -> pd.DataFrame:
-
+        '''
+        Merge the CPU and Energy dataframes into one dataframe
+        '''
         merged_df = pd.DataFrame(columns=["collection_time", "cpu_util", "watts"])
 
 
@@ -54,6 +56,11 @@ class CpuEnergyPair:
             
 
     def apply_moving_average(self, window_size : int = 7):
+        '''
+        Apply a moving average to the CPU and Energy dataframes
+        :param window_size: The size of the window to use for the moving average (default 7)
+        :type window_size: int
+        '''
 
         self._cpu_df["cpu_util"] = self._cpu_df["cpu_util"].rolling(window=window_size).mean()
         self._cpu_df.dropna(inplace=True)
@@ -64,6 +71,13 @@ class CpuEnergyPair:
         print(f"Applied moving average of window size {window_size} to both CPU and Energy data")
 
     def find_energy_for_cpu_time(self, cpu_time : float) -> float:
+        '''
+        Find an energy value for a given CPU time or lerp between the two closest values in time
+        :param cpu_time: The CPU time to find the energy for
+        :type cpu_time: float
+        :return: The energy calculated or found for the given CPU time
+        :rtype: float
+        '''
         
         time_delta = 0.05
 
@@ -123,6 +137,13 @@ class CpuEnergyPair:
         
 
     def compute_cpu_data(self, bin_count : int) -> Tuple[List[int], Dict[str, Dict[str, float]]]:
+        '''
+        Compute the CPU bin ordering and bin statistics for the CPU data given a bin count
+        :param bin_count: The number of bins to use
+        :type bin_count: int
+        :return: A tuple containing the bin ordering and the bin data ()
+        :rtype: Tuple[List[int], Dict[str, Dict[str, float]]]
+        '''
 
         cpu_data = self._cpu_df["cpu_util"].to_list()
         bin_width = (max(cpu_data) - min(cpu_data)) / bin_count
@@ -147,6 +168,13 @@ class CpuEnergyPair:
         return cpu_bin_ordering, cpu_bin_data
         
     def compute_poly_regression(self, degree : int) -> Tuple[List[float], float, List[float]]:
+        '''
+        Compute a polynomial regression for the CPU and Energy data
+        :param degree: The degree of the polynomial to use
+        :type degree: int
+        :return: A tuple containing the polynomial coefficients, the R^2 value, and energy standard deviations
+        :rtype: Tuple[List[float], float, List[float]]
+        '''
 
         if self._merged_cpu_energy_df is None:
             self._merged_cpu_energy_df = self.merge_data()
@@ -177,6 +205,12 @@ class CpuEnergyPair:
         return poly_coefs, r_2, polynomial_stds
 
     def plot_cpu_bins(self, bin_count : int = 10):
+        '''
+        Plot the CPU bin numbers and line seperators on top of the CPU utilization data
+        :param bin_count: The number of bins to use
+        :type bin_count: int
+        '''
+
         cpu_data = self._merged_cpu_energy_df["cpu_util"].to_list()
 
         cpu_bin_ordering, cpu_bin_data = self.compute_cpu_data(bin_count)
@@ -197,6 +231,14 @@ class CpuEnergyPair:
         plt.show()
 
     def plot(self, regression : bool = False, degree : int = 1):
+        '''
+        Plot the CPU utilization and energy data
+        :param regression: Whether or not to plot the regression line
+        :type regression: bool
+        :param degree: The degree of the polynomial to use for the regression
+        :type degree: int
+        '''
+
 
         if self._merged_cpu_energy_df is None:
             self._merged_cpu_energy_df = self.merge_data()
@@ -214,10 +256,10 @@ class CpuEnergyPair:
 
             plt.plot(cpu_data, comp_watts, color="red", label=f"Degree {degree} Polynomial Fit (R^2 = {r_2:.2f})")
 
-            # energy_stds : np.ndarray = np.array(poly_stds)
-            # comp_watts_stds = poly_fn(np.array(range(100)))
-            # plt.fill_between(np.arange(0.5, 100.5, 1), comp_watts_stds - energy_stds, comp_watts_stds + energy_stds, color="orange", alpha=0.8, label="Standard Deviation")
-            # plt.fill_between(np.arange(0.5, 100.5, 1), comp_watts_stds - energy_stds * 2, comp_watts_stds + energy_stds * 2, color="orange", alpha=0.4, label="2x Standard Deviation")
+            energy_stds : np.ndarray = np.array(poly_stds)
+            comp_watts_stds = poly_fn(np.array(range(100)))
+            plt.fill_between(np.arange(0.5, 100.5, 1), comp_watts_stds - energy_stds, comp_watts_stds + energy_stds, color="orange", alpha=0.8, label="Standard Deviation")
+            plt.fill_between(np.arange(0.5, 100.5, 1), comp_watts_stds - energy_stds * 2, comp_watts_stds + energy_stds * 2, color="orange", alpha=0.4, label="2x Standard Deviation")
 
             # for x in range(101):
             #     plt.axvline(x = x, color = 'b')
@@ -230,8 +272,17 @@ class CpuEnergyPair:
         plt.xticks(fontsize=30)
         plt.show()
 
-    def export_to_json_dict(self, bin_count : int = 10, regression_degree : int = 1):
-    
+    def export_to_json_dict(self, bin_count : int = 10, regression_degree : int = 1) -> Dict[str, Any]:
+        '''
+        Export the CPU utilization and energy data to a JSON dictionary
+        :param bin_count: The number of bins to use when calculating the CPU utilization data
+        :type bin_count: int
+        :param regression_degree: The degree of the polynomial to use for the regression
+        :type regression_degree: int
+        :return: A JSON dictionary containing the CPU utilization data and energy regression coefficents
+        :rtype: Dict[str, Any]
+        '''
+
         bin_ordering, bin_data = self.compute_cpu_data(bin_count)
         coefs, r_2, poly_stds = self.compute_poly_regression(regression_degree)
 
@@ -249,6 +300,9 @@ class CpuEnergyPair:
         return json_dict
     
     def export_merged_to_csv(self):
+        '''
+        Export the merged CPU utilization and energy dataset to a CSV file
+        '''
 
         cpu_name = "cpu"
         energy_name = "energy"
@@ -268,7 +322,9 @@ class CpuEnergyPair:
         self._merged_cpu_energy_df.to_csv(merged_path, index=False)
 
     def _compute_cpu_utilizations(self):
-
+        '''
+        Compute the CPU utilizations from the raw CPU data (/proc/sys)
+        '''
         last_busy_cycles = 0
         last_total_cycles = 0
 
@@ -296,7 +352,11 @@ class CpuEnergyPair:
         self._cpu_df = new_cpu_df
 
     def _convert_raw_cpu_to_csv(self) -> pd.DataFrame:
-
+        '''
+        Convert the raw CPU data to a CSV file and return the associated pandas DataFrame
+        :return: A Pandas DataFrame containing the raw CPU data
+        :rtype: pd.DataFrame
+        '''
         if self._raw_cpu_path is None:
             raise ValueError("Must set raw CPU data path before converting to CSV")
 
@@ -323,6 +383,11 @@ class CpuEnergyPair:
         return pd.read_csv(out_path)
     
     def _convert_raw_energy_to_csv(self) -> pd.DataFrame:
+        '''
+        Convert the raw Energy data to a CSV file and return the associated pandas DataFrame
+        :return: A Pandas DataFrame containing the raw Energy data
+        :rtype: pd.DataFrame
+        '''
 
         if self._raw_energy_path is None:
             raise ValueError("Must set raw Energy data path before converting to CSV")
@@ -357,7 +422,13 @@ class CpuEnergyPair:
         return pd.read_csv(out_path.as_posix())
     
     def __add__(self, other : "CpuEnergyPair") -> "CpuEnergyPair":
-        
+        '''
+        Add two CpuEnergyPair objects together by concatenating their CPU, Energy, and merged DataFrames
+        :param other: The other CpuEnergyPair object to add
+        :type other: CpuEnergyPair
+        '''
+
+
         new_cpu_df = pd.concat([self._cpu_df, other._cpu_df], ignore_index=True, sort=False)
         new_energy_df = pd.concat([self._energy_df, other._energy_df], ignore_index=True, sort=False)
         new_merged_df = pd.concat([self._merged_cpu_energy_df, other._merged_cpu_energy_df], ignore_index=True, sort=False)
