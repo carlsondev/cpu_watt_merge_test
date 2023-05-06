@@ -118,6 +118,7 @@ class CpuEnergyPair:
             print(f"CPU time: {cpu_time}")
             print(f"Neighboring times: {neighboring_times}")
             print(f"Neighboring watts: {neighboring_watts}")
+            print(f"Delta: {neighboring_times[1] - neighboring_times[0]}")
             raise e
         
 
@@ -183,9 +184,16 @@ class CpuEnergyPair:
         cpu_bin_width = (max(cpu_data) - min(cpu_data)) / bin_count
 
         plt.plot(cpu_data, "-",color="#ff8c00", label="CPU Utilization")
+        bin_idx = 0
         for y_val in np.arange(min(cpu_data), max(cpu_data)+(cpu_bin_width/100), cpu_bin_width):
-            plt.axhline(y=y_val, color="gray", linestyle="--", linewidth=1)
+            plt.axhline(y=y_val, color="gray", linestyle="--", linewidth=5)
+            if bin_idx < 10:
+                plt.annotate(str(bin_idx), xy=(-150, y_val+(cpu_bin_width/4)), fontsize=30, color="gray")
+            bin_idx += 1
 
+        plt.ylabel("CPU Utilization (%)", fontsize=36)
+        plt.yticks(fontsize=30)
+        plt.xticks([])
         plt.show()
 
     def plot(self, regression : bool = False, degree : int = 1):
@@ -206,17 +214,20 @@ class CpuEnergyPair:
 
             plt.plot(cpu_data, comp_watts, color="red", label=f"Degree {degree} Polynomial Fit (R^2 = {r_2:.2f})")
 
-            energy_stds : np.ndarray = np.array(poly_stds)
-            comp_watts_stds = poly_fn(np.array(range(100)))
-            plt.fill_between(np.arange(0.5, 100.5, 1), comp_watts_stds - energy_stds, comp_watts_stds + energy_stds, color="orange", alpha=0.8, label="Standard Deviation")
-            plt.fill_between(np.arange(0.5, 100.5, 1), comp_watts_stds - energy_stds * 2, comp_watts_stds + energy_stds * 2, color="orange", alpha=0.4, label="2x Standard Deviation")
+            # energy_stds : np.ndarray = np.array(poly_stds)
+            # comp_watts_stds = poly_fn(np.array(range(100)))
+            # plt.fill_between(np.arange(0.5, 100.5, 1), comp_watts_stds - energy_stds, comp_watts_stds + energy_stds, color="orange", alpha=0.8, label="Standard Deviation")
+            # plt.fill_between(np.arange(0.5, 100.5, 1), comp_watts_stds - energy_stds * 2, comp_watts_stds + energy_stds * 2, color="orange", alpha=0.4, label="2x Standard Deviation")
 
             # for x in range(101):
             #     plt.axvline(x = x, color = 'b')
             plt.legend()
 
-        plt.xlabel("CPU Utilization (%)")
-        plt.ylabel("Energy (Watts)")
+        plt.xlabel("CPU Utilization (%)", fontsize=36)
+        plt.ylabel("Energy (Watts)", fontsize=36)
+        plt.legend(fontsize=30)
+        plt.yticks(fontsize=30)
+        plt.xticks(fontsize=30)
         plt.show()
 
     def export_to_json_dict(self, bin_count : int = 10, regression_degree : int = 1):

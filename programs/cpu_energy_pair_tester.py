@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics import r2_score, mean_squared_error
 import matplotlib.pyplot as plt
+import matplotlib
 
 class CpuEnergyPairTester:
 
@@ -52,7 +53,10 @@ class CpuEnergyPairTester:
     def plot_watts(self):
         plt.plot(list(range(len(self._watts))), self._watts, label="Real Watts")
         plt.plot(list(range(len(self._gen_watts))), self._gen_watts, label="Predicted Watts")
-        plt.legend()
+        plt.legend(fontsize=30)
+        plt.ylabel("Watts", fontsize=36)
+        plt.yticks(fontsize=30)
+        plt.xticks([])
         plt.show()
 
     def poly_reg_str(self) -> str:
